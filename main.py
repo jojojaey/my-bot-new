@@ -1,18 +1,15 @@
-import os
-from telegram.ext import ApplicationBuilder, CommandHandler
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
+# ضع التوكين الخاص بك هنا
 TOKEN = '8802340199:AAFAs9C-V2qYlIZlxnBWX-SGN4r46JnY740'
 
-async def start(update, context):
-    await update.message.reply_text("Hello! The bot is working on Railway.")
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("البوت يعمل الآن بنجاح على Railway!")
 
 if __name__ == '__main__':
-    # استخدام الـ Port الذي يوفره Railway
-    port = int(os.environ.get("PORT", 8080))
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    
-    # تشغيل البوت
-    print("Bot is starting...")
-    app.run_polling()
+    application = ApplicationBuilder().token(TOKEN).build()
+    application.add_handler(CommandHandler('start', start))
+    print("Bot is running...")
+    application.run_polling()
     
