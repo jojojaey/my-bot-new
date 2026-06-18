@@ -3,15 +3,14 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandle
 
 # التوكن الخاص بك
 TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
-# ضعي الـ ID الخاص بك هنا
-ADMIN_IDS =[8055845627] 
 
-# قاموس لحفظ المستخدمين الجدد
+# قمت بإضافة رقم المدير الجديد معك في القائمة
+ADMIN_IDS =[8055845627, 8959353989] 
+
 users_db = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    # حفظ المستخدم في قاعدة البيانات
     users_db[user.id] = f"{user.first_name} (@{user.username})"
     
     keyboard = [[InlineKeyboardButton("📦 عرض الاشتراكات", callback_data='show_subs')]]
@@ -19,7 +18,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("أهلاً بك في متجرنا! اضغط الزر لعرض الاشتراكات:", reply_markup=reply_markup)
 
 async def show_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # أمر لرؤية قائمة المستخدمين (فقط للمديرين)
     if update.effective_user.id in ADMIN_IDS:
         msg = "👥 قائمة المستخدمين الذين دخلوا للبوت:\n\n"
         for uid, name in users_db.items():
@@ -48,11 +46,16 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = query.from_user
     choice = query.data
     
-    # تنبيه للمدير يتضمن هوية المستخدم
     msg = f"🔔 طلب جديد من {user.first_name}\nالـ ID الخاص به: {user.id}\nالطلب: {choice}"
     
-    await query.edit_message_text(f"✅ تم تسجيل طلبك ({choice}). سيتواصل معك الإداري قريباً!")
+    # رسالة تأكيد للعميل مع طلب الانتظار وشكرهم
+    await query.edit_message_text(
+        f"✅ تم تسجيل طلبك ({choice}).\n"
+        "يرجى انتظار الرد من قبل الإداريين بالخاص.\n"
+        "شكراً لاختيارنا! 🌹"
+    )
     
+    # إرسال التنبيه لكلا المديرين
     for admin_id in ADMIN_IDS:
         try:
             await context.bot.send_message(chat_id=admin_id, text=msg)
@@ -62,7 +65,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
     application.add_handler(CommandHandler('start', start))
-    application.add_handler(CommandHandler('users', show_users)) # الأمر الجديد
+    application.add_handler(CommandHandler('users', show_users))
     application.add_handler(CallbackQueryHandler(show_subs, pattern='show_subs'))
     application.add_handler(CallbackQueryHandler(handle_choice, pattern='sub_'))
     application.run_polling()
