@@ -1,52 +1,40 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
-# التوكن الخاص ببوتك
-TOKEN = '8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
-# ضعي هنا فقط ID المدير الذي تريدينه أن يستلم الطلبات
-ADMIN_IDS = [8055845627, 8959353989] 
+TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
+# ضعي هنا الـ ID الخاص بكِ (الذي حصلتِ عليه من @userinfobot)
+ADMIN_ID = [8055845627 ٫ 8959353989]
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("📦 عرض الاشتراكات", callback_data='show_subs')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("أهلاً بك في متجرنا! اضغط الزر لعرض الاشتراكات:", reply_markup=reply_markup)
+    await update.message.reply_text("أهلاً بك في متجرنا! اضغط الزر لعرض الاشتراكات:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def show_subs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     keyboard = [
-        [InlineKeyboardButton("Gemini Pro (10$ - سنة)", callback_data='sub_gemini')],
-        [InlineKeyboardButton("SuperGrok (10$ - شهر)", callback_data='sub_grok')],
-        [InlineKeyboardButton("DeepL Pro (10$ - شهر)", callback_data='sub_deepl')],
-        [InlineKeyboardButton("Netflix 4K (10$ - شهر)", callback_data='sub_netflix')],
-        [InlineKeyboardButton("Shahid VIP (10$ - شهر)", callback_data='sub_shahid')],
-        [InlineKeyboardButton("YouTube (10$ - 6 أشهر)", callback_data='sub_yt')],
-        [InlineKeyboardButton("Canva Pro (5$ - سنة)", callback_data='sub_canva')]
+        [InlineKeyboardButton("Gemini Pro (10$)", callback_data='sub_Gemini')],
+        [InlineKeyboardButton("SuperGrok (10$)", callback_data='sub_Grok')],
+        [InlineKeyboardButton("Canva Pro (5$)", callback_data='sub_Canva')]
     ]
     await query.edit_message_text("اختر الاشتراك المطلوب:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user = query.from_user
-    choice = query.data
+    choice = query.data.replace('sub_', '')
     
-    # 1. تنبيه للمدير يحتوي على رابط العميل للدردشة المباشرة
-    admin_msg = f"🔔 طلب اشتراك جديد!\n👤 العميل: [{user.first_name}](tg://user?id={user.id})\n📦 الطلب: {choice}"
+    # 1. إرسال إشعار للمدير (باسم العميل ورابط المحادثة معه)
+    admin_text = f"🔔 **طلب اشتراك جديد**\n\n👤 العميل: {user.first_name}\n🆔 المعرف: @{user.username if user.username else 'لا يوجد'}\n📦 الطلب: {choice}"
     
-    for admin_id in ADMIN_IDS:
-        try:
-            await context.bot.send_message(chat_id=admin_id, text=admin_msg, parse_mode='Markdown')
-        except:
-            pass
-            
-    # 2. زر التواصل مع المدير k7467655
+    try:
+        await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, parse_mode='Markdown')
+    except Exception as e:
+        print(f"Error: {e}")
+
+    # 2. رد للمستخدم مع زر التواصل مع المدير k7467655
     keyboard = [[InlineKeyboardButton("💬 اضغط هنا للتواصل مع المدير", url="https://t.me/k7467655")]]
-    
-    await query.edit_message_text(
-        f"✅ تم تسجيل طلبك ({choice}).\n"
-        "اضغط على الزر أدناه للتواصل مع المدير وإتمام الدفع.",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    await query.edit_message_text(f"✅ تم تسجيل طلبك ({choice}).\n\nاضغط الزر أدناه للتواصل مع المدير وإتمام العملية.", reply_markup=InlineKeyboardMarkup(keyboard))
 
 if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
@@ -54,3 +42,4 @@ if __name__ == '__main__':
     application.add_handler(CallbackQueryHandler(show_subs, pattern='show_subs'))
     application.add_handler(CallbackQueryHandler(handle_choice, pattern='sub_'))
     application.run_polling()
+    
