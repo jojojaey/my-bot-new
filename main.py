@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandle
 
 TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
 # ضعي هنا الـ ID الخاص بكِ (الذي حصلتِ عليه من @userinfobot)
-ADMIN_ID = [8055845627 ٫ 8959353989]
+ADMIN_ID = [8055845627,8959353989]
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("📦 عرض الاشتراكات", callback_data='show_subs')]]
