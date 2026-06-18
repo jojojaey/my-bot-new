@@ -1,23 +1,23 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
-# قاموس لحفظ طلبات المستخدمين
-orders = {}
+# 1. التوكن الخاص بك
+TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
+
+# 2. هنا ضعي الرقم الذي سيظهر لكِ بعد أن تضغطي /start
+ADMIN_IDS = [000000000] 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton("📦 اضغط هنا لعرض الاشتراكات", callback_data='show_subs')]]
+    # هذا السطر سيرسل الـ ID الخاص بكِ في رسالة فورية لتعرفيه
+    await update.message.reply_text(f"معرفك الخاص هو: {update.effective_user.id}")
+    
+    keyboard = [[InlineKeyboardButton("📦 عرض الاشتراكات", callback_data='show_subs')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(
-        "🤖 أهلاً بك في بوت متجرنا.\n"
-        "للاطلاع على قائمة الاشتراكات المتوفرة، اضغط على الزر بالأسفل:", 
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text("أهلاً بك في متجرنا! اضغط الزر لعرض الاشتراكات:", reply_markup=reply_markup)
 
 async def show_subs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    
-    # قائمة الاشتراكات مع تفاصيلها
     keyboard = [
         [InlineKeyboardButton("Gemini Pro (10 د.ع - سنة)", callback_data='sub_gemini')],
         [InlineKeyboardButton("SuperGrok Premium (10 د.ع - شهر)", callback_data='sub_grok')],
@@ -28,41 +28,29 @@ async def show_subs(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("YouTube Premium (10 د.ع - 6 أشهر)", callback_data='sub_yt')],
         [InlineKeyboardButton("Canva Pro (5 د.ع - سنة)", callback_data='sub_canva')]
     ]
-    await query.edit_message_text("اختر الاشتراك الذي تريده:", reply_markup=InlineKeyboardMarkup(keyboard))
+    await query.edit_message_text("اختر الاشتراك المطلوب:", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user = query.from_user
     choice = query.data
     
-    # تحويل الـ callback_data إلى اسم واضح
-    subs_names = {
-        'sub_gemini': 'Gemini Pro (سنة)',
-        'sub_grok': 'SuperGrok Premium (شهر)',
-        'sub_deepl': 'DeepL Pro (شهر)',
-        'sub_netflix': 'Netflix 4K (شهر)',
-        'sub_shahid': 'Shahid VIP (شهر)',
-        'sub_crunchy': 'Crunchyroll (سنة)',
-        'sub_yt': 'YouTube Premium (6 أشهر)',
-        'sub_canva': 'Canva Pro (سنة)'
-    }
+    # رسالة التنبيه التي ستصلك
+    msg = f"🔔 طلب جديد من {user.first_name}\nالطلب: {choice}"
     
-    selected_sub = subs_names.get(choice, "اشتراك غير معروف")
+    await query.edit_message_text(f"✅ تم تسجيل طلبك ({choice}). سيتواصل معك الإداري قريباً!")
     
-    # حفظ الطلب
-    orders[user.id] = f"{user.first_name} (ID: {user.id}) طلب: {selected_sub}"
-    
-    await query.edit_message_text(f"✅ تم تسجيل طلبك ({selected_sub}).\nسيتواصل معك الإداري قريباً!")
-    print(f"طلب جديد: {orders[user.id]}")
+    # إرسال التنبيه للأرقام الموجودة في ADMIN_IDS
+    for admin_id in ADMIN_IDS:
+        try:
+            await context.bot.send_message(chat_id=admin_id, text=msg)
+        except:
+            pass
 
 if __name__ == '__main__':
-    TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
     application = ApplicationBuilder().token(TOKEN).build()
-    
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(show_subs, pattern='show_subs'))
     application.add_handler(CallbackQueryHandler(handle_choice, pattern='sub_'))
-    
-    print("Bot is running...")
     application.run_polling()
     
