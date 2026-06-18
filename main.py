@@ -60,4 +60,3 @@ if __name__ == '__main__':
     application.add_handler(CallbackQueryHandler(show_subs, pattern='show_subs'))
     application.add_handler(CallbackQueryHandler(handle_choice, pattern='sub_'))
     application.run_polling()
-    
