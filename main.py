@@ -17,8 +17,8 @@ async def show_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in ADMIN_IDS:
         msg = "👥 قائمة المستخدمين:\n\n"
         for uid, name in users_db.items():
-            msg += f"👤 {name} (ID: {uid})\n"
-        await update.message.reply_text(msg)
+            msg += f"👤 {name} (ID: `{uid}`)\n"
+        await update.message.reply_text(msg, parse_mode='Markdown')
     else:
         await update.message.reply_text("عذراً، هذا الأمر للمديرين فقط.")
 
@@ -41,12 +41,12 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user = query.from_user
     choice = query.data
+    
     user_link = f"[{user.first_name}](tg://user?id={user.id})"
     msg = f"🔔 طلب جديد من: {user_link}\n🆔 الـ ID: `{user.id}`\n📦 الطلب: {choice}"
     
-    await query.edit_message_text(
-        "✅ تم تسجيل طلبك.\nيرجى انتظار الرد من قبل الإداريين بالخاص.\nشكراً لاختيارنا! 🌹"
-    )
+    await query.edit_message_text("✅ تم تسجيل طلبك.\nيرجى انتظار الرد من قبل الإداريين بالخاص.\nشكراً لاختيارنا! 🌹")
+    
     for admin_id in ADMIN_IDS:
         try:
             await context.bot.send_message(chat_id=admin_id, text=msg, parse_mode='Markdown')
