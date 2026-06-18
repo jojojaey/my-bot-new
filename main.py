@@ -1,11 +1,11 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
-# التوكن الخاص بك
-TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
+# التوكن الخاص بالسيرفر
+TOKEN = '8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
 
-# ضعي رقمكِ الخاص مكان الأصفار، ورقم المدير الآخر موجود بالفعل
-ADMIN_IDS =[8055845627, 8959353989] 
+# معرفكِ الخاص (8055845627) ومعرف المدير الآخر (8959353989)
+ADMIN_IDS = [8055845627, 8959353989] 
 
 users_db = {}
 
@@ -49,7 +49,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = query.from_user
     choice = query.data
     
-    # تحويل الاسم لرابط يفتح الخاص
+    # رابط يفتح محادثة المستخدم فوراً
     user_link = f"[{user.first_name}](tg://user?id={user.id})"
     
     msg = f"🔔 طلب جديد من: {user_link}\n🆔 الـ ID: `{user.id}`\n📦 الطلب: {choice}"
@@ -73,4 +73,3 @@ if __name__ == '__main__':
     application.add_handler(CallbackQueryHandler(show_subs, pattern='show_subs'))
     application.add_handler(CallbackQueryHandler(handle_choice, pattern='sub_'))
     application.run_polling()
-    
