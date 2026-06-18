@@ -40,7 +40,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 if __name__ == '__main__':
     # ضعي التوكن الخاص بكِ هنا
-    TOKEN ='8802340199:AAFAs9C-V2qYlIZIxnBWX-SGN4r46JnY740'
+    TOKEN ='8802340199:AAHCSMzIc8NB04QR8UHbQjarnOC3ia7hdAk'
     application = ApplicationBuilder().token(TOKEN).build()
     
     application.add_handler(CommandHandler('start', start))
