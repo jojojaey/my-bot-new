@@ -4,7 +4,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandle
 # التوكن الخاص بك
 TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
 
-# قمت بإضافة رقم المدير الجديد معك في القائمة
+# ضعي رقمكِ الخاص مكان الأصفار، ورقم المدير الآخر موجود بالفعل
 ADMIN_IDS =[8055845627, 8959353989] 
 
 users_db = {}
@@ -19,10 +19,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in ADMIN_IDS:
-        msg = "👥 قائمة المستخدمين الذين دخلوا للبوت:\n\n"
+        if not users_db:
+            await update.message.reply_text("القائمة فارغة.")
+            return
+        msg = "👥 قائمة المستخدمين:\n\n"
         for uid, name in users_db.items():
-            msg += f"👤 {name} (ID: {uid})\n"
-        await update.message.reply_text(msg)
+            msg += f"👤 {name} (ID: `{uid}`)\n"
+        await update.message.reply_text(msg, parse_mode='Markdown')
     else:
         await update.message.reply_text("عذراً، هذا الأمر للمديرين فقط.")
 
@@ -46,19 +49,20 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = query.from_user
     choice = query.data
     
-    msg = f"🔔 طلب جديد من {user.first_name}\nالـ ID الخاص به: {user.id}\nالطلب: {choice}"
+    # تحويل الاسم لرابط يفتح الخاص
+    user_link = f"[{user.first_name}](tg://user?id={user.id})"
     
-    # رسالة تأكيد للعميل مع طلب الانتظار وشكرهم
+    msg = f"🔔 طلب جديد من: {user_link}\n🆔 الـ ID: `{user.id}`\n📦 الطلب: {choice}"
+    
     await query.edit_message_text(
         f"✅ تم تسجيل طلبك ({choice}).\n"
         "يرجى انتظار الرد من قبل الإداريين بالخاص.\n"
         "شكراً لاختيارنا! 🌹"
     )
     
-    # إرسال التنبيه لكلا المديرين
     for admin_id in ADMIN_IDS:
         try:
-            await context.bot.send_message(chat_id=admin_id, text=msg)
+            await context.bot.send_message(chat_id=admin_id, text=msg, parse_mode='Markdown')
         except:
             pass
 
