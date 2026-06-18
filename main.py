@@ -1,8 +1,8 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
-TOKEN = '8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
-ADMIN_IDS = [8055845627, 8959353989] 
+TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
+ADMIN_IDS =[8055845627,8959353989] 
 
 users_db = {}
 
@@ -11,7 +11,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     users_db[user.id] = f"{user.first_name} (@{user.username})"
     keyboard = [[InlineKeyboardButton("📦 عرض الاشتراكات", callback_data='show_subs')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("أهلاً بك في متجرنا! اضغط الزر لعرض الاشتراكات:", reply_markup=reply_markup)
+    await update.message.reply_text("𝐦أهلاً بك في متجر 𝐦𝐨𝐧𝐞𝐲 𝐦𝐨𝐝𝐞! اضغط الزر لعرض الاشتراكات:", reply_markup=reply_markup)
 
 async def show_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id in ADMIN_IDS:
