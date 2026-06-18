@@ -56,7 +56,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"طلب جديد: {orders[user.id]}")
 
 if __name__ == '__main__':
-    TOKEN ='8802340199:AAG0NEH44pFuOPeIItEms5Ea2DrkRfcnRuY'
+    TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
     application = ApplicationBuilder().token(TOKEN).build()
     
     application.add_handler(CommandHandler('start', start))
