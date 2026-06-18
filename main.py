@@ -5,7 +5,6 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandle
 orders = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # زر "الاشتراكات" الذي يظهر في رسالة الترحيب
     keyboard = [[InlineKeyboardButton("📦 اضغط هنا لعرض الاشتراكات", callback_data='show_subs')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
@@ -17,12 +16,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def show_subs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    # قائمة الاشتراكات (يمكنك إضافة البقية بنفس الطريقة)
+    
+    # قائمة الاشتراكات مع تفاصيلها
     keyboard = [
-        [InlineKeyboardButton("Gemini Pro (10,000)", callback_data='sub_gemini')],
-        [InlineKeyboardButton("Netflix 4K (10,000)", callback_data='sub_netflix')],
-        [InlineKeyboardButton("Canva Pro (5,000)", callback_data='sub_canva')],
-        [InlineKeyboardButton("YouTube Premium (10,000)", callback_data='sub_yt')]
+        [InlineKeyboardButton("Gemini Pro (10 د.ع - سنة)", callback_data='sub_gemini')],
+        [InlineKeyboardButton("SuperGrok Premium (10 د.ع - شهر)", callback_data='sub_grok')],
+        [InlineKeyboardButton("DeepL Pro (10 د.ع - شهر)", callback_data='sub_deepl')],
+        [InlineKeyboardButton("Netflix 4K (10 د.ع - شهر)", callback_data='sub_netflix')],
+        [InlineKeyboardButton("Shahid VIP (10 د.ع - شهر)", callback_data='sub_shahid')],
+        [InlineKeyboardButton("Crunchyroll (12 د.ع - سنة)", callback_data='sub_crunchy')],
+        [InlineKeyboardButton("YouTube Premium (10 د.ع - 6 أشهر)", callback_data='sub_yt')],
+        [InlineKeyboardButton("Canva Pro (5 د.ع - سنة)", callback_data='sub_canva')]
     ]
     await query.edit_message_text("اختر الاشتراك الذي تريده:", reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -31,15 +35,27 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = query.from_user
     choice = query.data
     
-    # حفظ الطلب
-    orders[user.id] = f"{user.first_name} (ID: {user.id}) طلب: {choice}"
+    # تحويل الـ callback_data إلى اسم واضح
+    subs_names = {
+        'sub_gemini': 'Gemini Pro (سنة)',
+        'sub_grok': 'SuperGrok Premium (شهر)',
+        'sub_deepl': 'DeepL Pro (شهر)',
+        'sub_netflix': 'Netflix 4K (شهر)',
+        'sub_shahid': 'Shahid VIP (شهر)',
+        'sub_crunchy': 'Crunchyroll (سنة)',
+        'sub_yt': 'YouTube Premium (6 أشهر)',
+        'sub_canva': 'Canva Pro (سنة)'
+    }
     
-    await query.edit_message_text(f"✅ تم تسجيل طلبك ({choice}).\nسيتواصل معك الإداري قريباً!")
-    # هذا السطر يطبع الطلب في سجلات Railway لكي تري من طلب ماذا
+    selected_sub = subs_names.get(choice, "اشتراك غير معروف")
+    
+    # حفظ الطلب
+    orders[user.id] = f"{user.first_name} (ID: {user.id}) طلب: {selected_sub}"
+    
+    await query.edit_message_text(f"✅ تم تسجيل طلبك ({selected_sub}).\nسيتواصل معك الإداري قريباً!")
     print(f"طلب جديد: {orders[user.id]}")
 
 if __name__ == '__main__':
-    # ضعي التوكن الخاص بكِ هنا
     TOKEN ='8802340199:AAG0NEH44pFuOPeIItEms5Ea2DrkRfcnRuY'
     application = ApplicationBuilder().token(TOKEN).build()
     
