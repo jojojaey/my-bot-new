@@ -1,19 +1,32 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
 
-# 1. التوكن الخاص بك
+# التوكن الخاص بك
 TOKEN ='8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
+# ضعي الـ ID الخاص بك هنا
+ADMIN_IDS =[8055845627] 
 
-# 2. هنا ضعي الرقم الذي سيظهر لكِ بعد أن تضغطي /start
-ADMIN_IDS = [000000000] 
+# قاموس لحفظ المستخدمين الجدد
+users_db = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # هذا السطر سيرسل الـ ID الخاص بكِ في رسالة فورية لتعرفيه
-    await update.message.reply_text(f"معرفك الخاص هو: {update.effective_user.id}")
+    user = update.effective_user
+    # حفظ المستخدم في قاعدة البيانات
+    users_db[user.id] = f"{user.first_name} (@{user.username})"
     
     keyboard = [[InlineKeyboardButton("📦 عرض الاشتراكات", callback_data='show_subs')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("أهلاً بك في متجرنا! اضغط الزر لعرض الاشتراكات:", reply_markup=reply_markup)
+
+async def show_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # أمر لرؤية قائمة المستخدمين (فقط للمديرين)
+    if update.effective_user.id in ADMIN_IDS:
+        msg = "👥 قائمة المستخدمين الذين دخلوا للبوت:\n\n"
+        for uid, name in users_db.items():
+            msg += f"👤 {name} (ID: {uid})\n"
+        await update.message.reply_text(msg)
+    else:
+        await update.message.reply_text("عذراً، هذا الأمر للمديرين فقط.")
 
 async def show_subs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -35,12 +48,11 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = query.from_user
     choice = query.data
     
-    # رسالة التنبيه التي ستصلك
-    msg = f"🔔 طلب جديد من {user.first_name}\nالطلب: {choice}"
+    # تنبيه للمدير يتضمن هوية المستخدم
+    msg = f"🔔 طلب جديد من {user.first_name}\nالـ ID الخاص به: {user.id}\nالطلب: {choice}"
     
     await query.edit_message_text(f"✅ تم تسجيل طلبك ({choice}). سيتواصل معك الإداري قريباً!")
     
-    # إرسال التنبيه للأرقام الموجودة في ADMIN_IDS
     for admin_id in ADMIN_IDS:
         try:
             await context.bot.send_message(chat_id=admin_id, text=msg)
@@ -50,6 +62,7 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
     application.add_handler(CommandHandler('start', start))
+    application.add_handler(CommandHandler('users', show_users)) # الأمر الجديد
     application.add_handler(CallbackQueryHandler(show_subs, pattern='show_subs'))
     application.add_handler(CallbackQueryHandler(handle_choice, pattern='sub_'))
     application.run_polling()
