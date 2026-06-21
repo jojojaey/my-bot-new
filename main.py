@@ -5,6 +5,7 @@ TOKEN = '8802340199:AAE66Wvg88qjA1e7scwGc8p1rfAaYH5ZnS4'
 ADMIN_IDS = [8055845627, 8959353989] 
 CHANNEL_USERNAME = "@MONEYMODE1825"
 
+# قائمة الاشتراكات
 SUBS = [
     ("Gemini Pro (10$ - سنة)", "sub_gemini"),
     ("SuperGrok Premium (10$ - شهر)", "sub_grok"),
@@ -34,18 +35,12 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = query.from_user
     choice = query.data
     
-    # تحويل اسم العميل إلى رابط مباشر (tg://user?id=...)
-    # هذا يخليكِ بمجرد الضغط على الاسم تفتحين محادثة الشخص
-    customer_link = f"[{user.full_name}](tg://user?id={user.id})"
-    username = f"@{user.username}" if user.username else "لا يوجد يوزر"
-    
     choice_text = next((text for text, data in SUBS if data == choice), choice)
     
-    # الإشعار المحدث: الاسم الآن عبارة عن رابط للمحادثة
-    msg = (f"🔔 طلب اشتراك جديد!\n\n"
-           f"👤 العميل: {customer_link}\n"
-           f"🆔 اليوزر: {username}\n"
-           f"🔢 الآيدي: `{user.id}`\n"
+    # الإشعار الآن يحتوي على الاسم والمعرف (ID)
+    msg = (f"🔔 طلب جديد!\n"
+           f"👤 العميل: {user.full_name}\n"
+           f"🆔 معرف العميل (ID): `{user.id}`\n"
            f"📦 الطلب: {choice_text}")
     
     for admin_id in ADMIN_IDS:
@@ -53,13 +48,10 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=admin_id, text=msg, parse_mode='Markdown')
         except: pass
             
+    # زر التواصل
     keyboard = [[InlineKeyboardButton("💬 اضغط هنا للتواصل مع المدير", url="https://t.me/k7467655")]]
-    await query.edit_message_text(
-        f"✅ تم تسجيل طلبك ({choice_text}).\n"
-        "شكراً لاختيارنا! 🌹", 
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-    
+    await query.edit_message_text(f"✅ تم تسجيل طلبك ({choice_text}).\nاضغط الزر أدناه للتواصل مع المدير وإتمام الدفع.", reply_markup=InlineKeyboardMarkup(keyboard))
+
 if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
     application.add_handler(CommandHandler('start', start))
