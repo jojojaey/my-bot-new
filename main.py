@@ -34,20 +34,18 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = query.from_user
     choice = query.data
     
-    # استخراج البيانات
-    full_name = user.full_name
-    username = f"@{user.username}" if user.username else "لا يوجد"
-    
-    # هنا قمنا بإنشاء معرف العميل (استخدمنا الـ user.id وهو المعرف الفريد الخاص بتيليجرام)
-    customer_id = user.id 
+    # تحويل اسم العميل إلى رابط مباشر (tg://user?id=...)
+    # هذا يخليكِ بمجرد الضغط على الاسم تفتحين محادثة الشخص
+    customer_link = f"[{user.full_name}](tg://user?id={user.id})"
+    username = f"@{user.username}" if user.username else "لا يوجد يوزر"
     
     choice_text = next((text for text, data in SUBS if data == choice), choice)
     
-    # الإشعار المحدث يحتوي الآن على معرف خاص للعميل
-    msg = (f"🔔 طلب جديد!\n\n"
-           f"👤 الاسم: {full_name}\n"
+    # الإشعار المحدث: الاسم الآن عبارة عن رابط للمحادثة
+    msg = (f"🔔 طلب اشتراك جديد!\n\n"
+           f"👤 العميل: {customer_link}\n"
            f"🆔 اليوزر: {username}\n"
-           f"🔢 معرف العميل (ID): `{customer_id}`\n"
+           f"🔢 الآيدي: `{user.id}`\n"
            f"📦 الطلب: {choice_text}")
     
     for admin_id in ADMIN_IDS:
@@ -56,8 +54,12 @@ async def handle_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except: pass
             
     keyboard = [[InlineKeyboardButton("💬 اضغط هنا للتواصل مع المدير", url="https://t.me/k7467655")]]
-    await query.edit_message_text(f"✅ تم تسجيل طلبك ({choice_text}).\nمعرف طلبك هو: `{customer_id}`\nاضغط الزر أدناه للتواصل مع المدير.", reply_markup=InlineKeyboardMarkup(keyboard))
-
+    await query.edit_message_text(
+        f"✅ تم تسجيل طلبك ({choice_text}).\n"
+        "شكراً لاختيارنا! 🌹", 
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+    
 if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
     application.add_handler(CommandHandler('start', start))
